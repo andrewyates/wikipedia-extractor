@@ -443,7 +443,7 @@ class Extractor(object):
         url = get_url(self.id)
         header = '<doc id="%s" url="%s" title="%s">\n' % (self.id, url, self.title)
         # Separate header from text with a newline.
-        header += self.title + '\n\n'
+        #header += self.title + '\n\n' # don't repeat title (which is in header sgml)
         header = header.encode('utf-8')
         self.magicWords['pagename'] = self.title
         self.magicWords['fullpagename'] = self.title
@@ -2154,7 +2154,7 @@ def compact(text):
             if title:
                 if title[-1] not in '!?':
                     title += '.'
-                page.append(title)
+                page.append(title) # don't repeat title
         # handle indents
         elif line[0] == ':':
             # page.append(line.lstrip(':*#;'))
@@ -2217,7 +2217,7 @@ def compact(text):
                 items = headers.items()
                 items.sort()
                 for i, v in items:
-                    page.append(v)
+                    page.append("<section level=%s name='%s'>" % (i, v))
             headers.clear()
             page.append(line)  # first line
             emptySection = False
