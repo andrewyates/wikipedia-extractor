@@ -9,8 +9,11 @@ import gensim
 import nltk
 import nltk.tokenize.punkt
 import unicodedata
+from unidecode import unidecode
 
 docstart = re.compile('<doc id="[^"]+" url="[^"]+" title="([^"]+)">')
+# numbers including commas, decimals, exponents, negative signs/hyphens, and quotes
+numre = re.compile(r'(?:-|"|\')?\d+(?:,\d+)*(?:\.\d+(?:(?:e|E)\d+)?)?(-|\s|$|"|\')')
 sentok = nltk.tokenize.punkt.PunktSentenceTokenizer()
 
 
@@ -60,15 +63,17 @@ def tojson(fn):
                 if title is None:
                     raise ValueError("encountered content with no title set: %s" % line)
                 else:
-                    #docs[title].append(line)
                     section += " " + line
 
     return docs
 
 
+#TODO replace numbers?
 def tokenize_string(txt, lower=True, split_sentences=False):
     txt = gensim.utils.any2unicode(txt, encoding='utf-8', errors='strict')
-    txt = unicodedata.normalize('NFKD', txt)  
+    txt = unidecode(unicodedata.normalize('NFKD', txt))
+    txt = numre.sub(r"normedn\1", txt)  # normalize numbers
+    txt = txt.replace("-", " - ")  # force space before/after hyphens (word_tokenize doesn't)
     #txt = re.sub(r"([.,!;?])([^\s])", r"\1 \2", txt)  # force space after punctuation
 
     if split_sentences:
