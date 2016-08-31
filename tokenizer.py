@@ -68,12 +68,11 @@ def tojson(fn):
     return docs
 
 
-#TODO replace numbers?
 def tokenize_string(txt, lower=True, split_sentences=False):
     txt = gensim.utils.any2unicode(txt, encoding='utf-8', errors='strict')
     txt = unidecode(unicodedata.normalize('NFKD', txt))
     txt = numre.sub(r"normedn\1", txt)  # normalize numbers
-    txt = txt.replace("-", " - ")  # force space before/after hyphens (word_tokenize doesn't)
+    #txt = txt.replace("-", " - ")  # force space before/after hyphens (word_tokenize doesn't)
     #txt = re.sub(r"([.,!;?])([^\s])", r"\1 \2", txt)  # force space after punctuation
 
     if split_sentences:
@@ -89,12 +88,13 @@ def tokenize_string(txt, lower=True, split_sentences=False):
 
 def process(fn):
     docs = tojson(fn)
-    tokdocs = {title: [tokenize_string(section, lower=True, split_sentences=False) for section in sections]
+    tokdocs = {tokenize_string(title)[0]: [tokenize_string(section, lower=True, split_sentences=False)
+                                           for section in sections]
                for title, sections in docs.iteritems()}
     
     outfn = fn + ".tok.json"
     with codecs.open(outfn, 'w', encoding='utf-8') as f:
-        json.dump(tokdocs, f)
+        json.dump(tokdocs, f, indent=4)
 
 if __name__ == '__main__':
     main()
